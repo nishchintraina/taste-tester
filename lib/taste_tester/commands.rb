@@ -109,6 +109,10 @@ module TasteTester
           tested_hosts << hostname
         rescue TasteTester::Exceptions::AlreadyTestingError => e
           logger.error("User #{e.username} is already testing on #{hostname}")
+        rescue => e
+          # Call error handling hook and re-raise
+          TasteTester::Hooks.post_error(TasteTester::Config.dryrun, __method__, hostname)
+          raise
         end
       end
       unless TasteTester::Config.skip_post_test_hook ||
@@ -145,7 +149,13 @@ module TasteTester
       server = TasteTester::Server.new
       hosts.each do |hostname|
         host = TasteTester::Host.new(hostname, server)
-        host.untest
+        begin
+          host.untest
+        rescue => e
+          # Call error handling hook and re-raise
+          TasteTester::Hooks.post_error(TasteTester::Config.dryrun, __method__, hostname)
+          raise
+        end
       end
     end
 
@@ -158,7 +168,13 @@ module TasteTester
       server = TasteTester::Server.new
       hosts.each do |hostname|
         host = TasteTester::Host.new(hostname, server)
-        host.runchef
+        begin
+          host.runchef
+        rescue => e
+          # Call error handling hook and re-raise
+          TasteTester::Hooks.post_error(TasteTester::Config.dryrun, __method__, hostname)
+          raise
+        end
       end
     end
 
@@ -171,7 +187,13 @@ module TasteTester
       server = TasteTester::Server.new
       hosts.each do |hostname|
         host = TasteTester::Host.new(hostname, server)
-        host.keeptesting
+        begin
+          host.keeptesting
+        rescue => e
+          # Call error handling hook and re-raise
+          TasteTester::Hooks.post_error(TasteTester::Config.dryrun, __method__, hostname)
+          raise
+        end
       end
     end
 
